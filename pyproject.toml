@@ -1,0 +1,68 @@
+[tool.poetry]
+name = "agingclockbench"
+version = "0.1.0"
+description = "Benchmark biological aging clocks on your data"
+authors = ["Aaditya Geddam <aaditya.geddam@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/aadityageddam-ux/aging_clock_bench"
+keywords = ["aging", "biomarkers", "clocks", "longevity", "biological-age"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+packages = [{include = "agingclockbench", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = ">=2.2.0"
+numpy = ">=1.26.0"
+scipy = ">=1.13.0"
+lifelines = ">=0.28.0"
+pydantic = ">=2.3.0"
+plotly = ">=5.17.0"
+seaborn = ">=0.13.0"
+matplotlib = ">=3.8.0"
+click = ">=8.1.0"
+pyarrow = ">=13.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "~7.4.0"
+pytest-cov = "~4.1.0"
+hypothesis = "~6.82.0"
+black = "~23.9.0"
+ruff = "~0.1.0"
+mypy = "~1.5.0"
+mkdocs = "~1.5.0"
+mkdocs-material = "~9.1.0"
+
+[tool.poetry.scripts]
+agingclockbench = "agingclockbench.cli:cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.coverage.run]
+source = ["src/agingclockbench"]
+omit = ["*/tests/*", "*/__init__.py"]

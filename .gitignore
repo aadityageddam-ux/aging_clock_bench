@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+site/
+*.parquet
+!src/agingclockbench/datasets/nhanes_sample.parquet
+.env
+*.log
