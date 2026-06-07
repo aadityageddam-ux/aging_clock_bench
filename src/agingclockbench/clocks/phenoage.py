@@ -151,5 +151,6 @@ class PhenoAge(BaseClock):
             missing_data_pct=missing_pct,
             input_rows=input_rows,
             output_rows=len(complete),
+            original_index=complete.index,
             metadata={"reference": "Levine 2018 Aging Cell", "coefficients": _COEFFICIENTS},
         )

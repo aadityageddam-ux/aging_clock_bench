@@ -27,14 +27,15 @@ class BenchmarkResult:
 
 
 class BenchmarkSuite:
-    """Run a standardized validation benchmark on one or more aging clocks.
+    """Run a standardised validation benchmark on one or more aging clocks.
 
     Parameters
     ----------
     mortality_col : str
         Column name for vital status (1 = dead, 0 = censored).
     followup_col : str
-        Column name for follow-up time in months.
+        Column name for follow-up time. Units must be consistent — the HR
+        interpretation assumes months if using NHANES permth_exm.
 
     Examples
     --------
@@ -54,11 +55,13 @@ class BenchmarkSuite:
     ) -> "BenchmarkReport":
         """Compute benchmark metrics for each clock result.
 
+        Uses ``ClockResult.original_index`` to align clock outputs with
+        the correct rows in ``df`` (handles missing-data row drops).
+
         Parameters
         ----------
-        df : DataFrame — original input, must include ``age`` and optionally
-             mortality columns.
-        results : dict mapping clock name to ClockResult.
+        df : Original input DataFrame.
+        results : Mapping of clock name → ClockResult.
 
         Returns
         -------
@@ -70,55 +73,62 @@ class BenchmarkSuite:
         for name, result in results.items():
             br = BenchmarkResult(clock_name=name)
 
-            # Align age to result rows (complete cases only)
-            age = df["age"].iloc[: result.output_rows].reset_index(drop=True)
+            # Align df rows to the rows the clock actually processed
+            if result.original_index is not None:
+                aligned_df = df.loc[result.original_index].reset_index(drop=True)
+            else:
+                aligned_df = df.iloc[: result.output_rows].reset_index(drop=True)
+
+            age = aligned_df["age"]
 
             # Pearson / Spearman correlation with chronological age
-            r, p = stats.pearsonr(age, result.biological_ages)
-            br.pearson_r = round(float(r), 4)
-            br.pearson_pvalue = round(float(p), 6)
-            br.spearman_r = round(float(stats.spearmanr(age, result.biological_ages).statistic), 4)
+            if age.nunique() > 1:
+                r, p = stats.pearsonr(age, result.biological_ages)
+                br.pearson_r = round(float(r), 4)
+                br.pearson_pvalue = round(float(p), 6)
+                spr = stats.spearmanr(age, result.biological_ages).statistic
+                br.spearman_r = round(float(spr), 4)
 
             # Coefficient of variation
             mean_ba = result.biological_ages.mean()
             std_ba = result.biological_ages.std()
             br.cv = round(float(std_ba / mean_ba), 4) if mean_ba != 0 else float("nan")
 
-            # Cox PH mortality prediction (requires lifelines)
-            if self.mortality_col in df.columns and self.followup_col in df.columns:
-                br = self._run_cox(df, result, br)
+            # Cox PH mortality prediction
+            if self.mortality_col in aligned_df.columns and self.followup_col in aligned_df.columns:
+                br = self._run_cox(aligned_df, result, br)
 
             benchmark_results.append(br)
             accel_series[name] = result.accel
 
-        # Inter-clock agreement
+        # Inter-clock agreement (Pearson r of accelerations)
         for br in benchmark_results:
             others = {k: v for k, v in accel_series.items() if k != br.clock_name}
             for other_name, other_accel in others.items():
                 min_len = min(len(accel_series[br.clock_name]), len(other_accel))
-                r, _ = stats.pearsonr(
-                    accel_series[br.clock_name].iloc[:min_len],
-                    other_accel.iloc[:min_len],
-                )
-                br.clock_agreement_with_others[other_name] = round(float(r), 4)
+                if min_len > 2 and accel_series[br.clock_name].iloc[:min_len].nunique() > 1:
+                    r, _ = stats.pearsonr(
+                        accel_series[br.clock_name].iloc[:min_len],
+                        other_accel.iloc[:min_len],
+                    )
+                    br.clock_agreement_with_others[other_name] = round(float(r), 4)
 
         return BenchmarkReport(results=benchmark_results)
 
     def _run_cox(
         self,
-        df: pd.DataFrame,
+        aligned_df: pd.DataFrame,
         result: ClockResult,
         br: BenchmarkResult,
     ) -> BenchmarkResult:
+        """Fit a Cox PH model: mortality ~ clock_acceleration_sd + age."""
         try:
             from lifelines import CoxPHFitter
 
-            analysis_df = df[[self.mortality_col, self.followup_col, "age"]].iloc[
-                : result.output_rows
-            ].copy().reset_index(drop=True)
+            analysis_df = aligned_df[[self.mortality_col, self.followup_col, "age"]].copy()
             analysis_df["clock_acceleration"] = result.accel.values
 
-            # Standardise acceleration for per-SD HR
+            # Standardise acceleration to per-SD hazard ratio
             sd = analysis_df["clock_acceleration"].std()
             if sd > 0:
                 analysis_df["clock_acceleration"] /= sd
@@ -140,9 +150,9 @@ class BenchmarkSuite:
             br.mortality_hr_ci_lower = round(float(np.exp(row["coef lower 95%"])), 4)
             br.mortality_hr_ci_upper = round(float(np.exp(row["coef upper 95%"])), 4)
             br.mortality_pvalue = round(float(row["p"]), 6)
-            br.cox_nobs = int(cph.event_observed.sum())
+            br.cox_nobs = int(analysis_df[self.mortality_col].sum())
         except Exception:
-            pass  # mortality data unavailable or insufficient
+            pass
         return br
 
 
@@ -156,25 +166,25 @@ class BenchmarkReport:
         """Return a summary DataFrame — one row per clock."""
         rows = []
         for r in self.results:
-            rows.append(
-                {
-                    "Clock": r.clock_name,
-                    "Pearson r": r.pearson_r,
-                    "Spearman r": r.spearman_r,
-                    "Mort HR": r.mortality_hr,
-                    "Mort p-value": r.mortality_pvalue,
-                    "CV": r.cv,
-                    "Cox N (events)": r.cox_nobs,
-                }
-            )
+            rows.append({
+                "Clock": r.clock_name,
+                "Pearson r": r.pearson_r,
+                "Spearman r": r.spearman_r,
+                "Mort HR (per SD accel)": r.mortality_hr,
+                "HR 95% CI lower": r.mortality_hr_ci_lower,
+                "HR 95% CI upper": r.mortality_hr_ci_upper,
+                "Mort p-value": r.mortality_pvalue,
+                "Cox N (events)": r.cox_nobs,
+                "CV": r.cv,
+            })
         return pd.DataFrame(rows)
 
     def plot_comparison(self):
-        """Scatter plot of biological age vs chronological age per clock."""
+        """Scatter: biological age vs chronological age per clock."""
         raise NotImplementedError("Plotting implemented in Week 3.")
 
     def plot_km_survival(self):
-        """Kaplan-Meier survival curves stratified by acceleration quartile."""
+        """Kaplan-Meier by acceleration quartile."""
         raise NotImplementedError("Plotting implemented in Week 3.")
 
     def to_html(self, filename: str) -> None:

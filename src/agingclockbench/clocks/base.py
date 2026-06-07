@@ -2,13 +2,21 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import Optional
 
 import pandas as pd
 
 
 @dataclass
 class ClockResult:
-    """Output from a clock's .transform() call."""
+    """Output from a clock's .transform() call.
+
+    Attributes
+    ----------
+    original_index : pd.Index of the rows in the original input DataFrame that
+        were actually processed (i.e., had complete data). Used by BenchmarkSuite
+        to align mortality/survival data with clock outputs.
+    """
 
     clock_name: str
     biological_ages: pd.Series
@@ -16,6 +24,7 @@ class ClockResult:
     missing_data_pct: float
     input_rows: int
     output_rows: int
+    original_index: Optional[pd.Index] = None
     metadata: dict = field(default_factory=dict)
 
 
