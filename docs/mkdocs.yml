@@ -1,0 +1,74 @@
+site_name: AgingClockBench
+site_description: Benchmark biological aging clocks on your data
+site_author: Aaditya Geddam
+site_url: https://aadityageddam-ux.github.io/aging_clock_bench/
+repo_url: https://github.com/aadityageddam-ux/aging_clock_bench
+repo_name: aging_clock_bench
+edit_uri: ""
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [../src]
+          options:
+            show_source: false
+            docstring_style: numpy
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - API Reference:
+    - Clocks: api/clocks.md
+    - Benchmark: api/benchmarks.md
+    - Datasets: api/datasets.md
+  - Algorithms:
+    - PhenoAge: algorithms/phenoage.md
+    - KDM: algorithms/kdm.md
+    - DunedinPACE Proxy: algorithms/dunedinpace.md
+  - FAQ: faq.md
+  - Changelog: changelog.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/aadityageddam-ux/aging_clock_bench
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/agingclockbench/

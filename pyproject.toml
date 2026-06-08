@@ -1,20 +1,27 @@
 [tool.poetry]
 name = "agingclockbench"
 version = "0.1.0"
-description = "Benchmark biological aging clocks on your data"
+description = "Benchmark biological aging clocks on your data — PhenoAge, KDM, DunedinPACE proxy"
 authors = ["Aaditya Geddam <aaditya.geddam@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://aadityageddam-ux.github.io/aging_clock_bench/"
 repository = "https://github.com/aadityageddam-ux/aging_clock_bench"
-keywords = ["aging", "biomarkers", "clocks", "longevity", "biological-age"]
+documentation = "https://aadityageddam-ux.github.io/aging_clock_bench/"
+keywords = ["aging", "biomarkers", "aging-clocks", "longevity", "biological-age",
+            "phenoage", "kdm", "nhanes", "mortality"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
 packages = [{include = "agingclockbench", from = "src"}]
+include = ["src/agingclockbench/datasets/nhanes_sample.parquet"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -38,6 +45,7 @@ ruff = "~0.1.0"
 mypy = "~1.5.0"
 mkdocs = "~1.5.0"
 mkdocs-material = "~9.1.0"
+mkdocstrings = {version = ">=0.24.0", extras = ["python"]}
 
 [tool.poetry.scripts]
 agingclockbench = "agingclockbench.cli:cli"
