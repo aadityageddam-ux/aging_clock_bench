@@ -8,7 +8,7 @@ htmlcov/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-site/
+docs/site/
 *.parquet
 !src/agingclockbench/datasets/nhanes_sample.parquet
 .env
