@@ -113,7 +113,13 @@ class BenchmarkSuite:
                     )
                     br.clock_agreement_with_others[other_name] = round(float(r), 4)
 
-        return BenchmarkReport(results=benchmark_results)
+        return BenchmarkReport(
+            results=benchmark_results,
+            df=df,
+            clock_results=results,
+            mortality_col=self.mortality_col,
+            followup_col=self.followup_col,
+        )
 
     def _run_cox(
         self,
@@ -157,10 +163,28 @@ class BenchmarkSuite:
 
 
 class BenchmarkReport:
-    """Container for all benchmark results with display and export methods."""
+    """Container for all benchmark results with display and export methods.
 
-    def __init__(self, results: list[BenchmarkResult]) -> None:
+    Attributes
+    ----------
+    results : list[BenchmarkResult]
+    _df : the original input DataFrame (set by BenchmarkSuite.run)
+    _clock_results : dict mapping clock name -> ClockResult
+    """
+
+    def __init__(
+        self,
+        results: list[BenchmarkResult],
+        df: pd.DataFrame | None = None,
+        clock_results: dict | None = None,
+        mortality_col: str = "mortstat",
+        followup_col: str = "permth_exm",
+    ) -> None:
         self.results = results
+        self._df = df
+        self._clock_results = clock_results or {}
+        self._mortality_col = mortality_col
+        self._followup_col = followup_col
 
     def to_dataframe(self) -> pd.DataFrame:
         """Return a summary DataFrame — one row per clock."""
@@ -179,14 +203,60 @@ class BenchmarkReport:
             })
         return pd.DataFrame(rows)
 
-    def plot_comparison(self):
-        """Scatter: biological age vs chronological age per clock."""
-        raise NotImplementedError("Plotting implemented in Week 3.")
+    def plot_comparison(self, df: pd.DataFrame | None = None,
+                        results: dict | None = None):
+        """Scatter plot of biological age vs chronological age per clock.
 
-    def plot_km_survival(self):
-        """Kaplan-Meier by acceleration quartile."""
-        raise NotImplementedError("Plotting implemented in Week 3.")
+        Returns matplotlib Figure. Pass ``df`` and ``results`` only if you
+        did not run via BenchmarkSuite.run().
+        """
+        from agingclockbench.benchmarks.plots import plot_comparison
+        return plot_comparison(
+            self,
+            df if df is not None else self._df,
+            results if results is not None else self._clock_results,
+        )
 
-    def to_html(self, filename: str) -> None:
-        """Export interactive Plotly HTML report."""
-        raise NotImplementedError("HTML export implemented in Week 3.")
+    def plot_km_survival(self, df: pd.DataFrame | None = None,
+                         results: dict | None = None,
+                         n_quartiles: int = 4):
+        """Kaplan-Meier survival by age-acceleration quartile.
+
+        Returns matplotlib Figure.
+        """
+        from agingclockbench.benchmarks.plots import plot_km_survival
+        return plot_km_survival(
+            df if df is not None else self._df,
+            results if results is not None else self._clock_results,
+            mortality_col=self._mortality_col,
+            followup_col=self._followup_col,
+            n_quartiles=n_quartiles,
+        )
+
+    def plot_correlation_heatmap(self, results: dict | None = None):
+        """Heatmap of Pearson correlations between clock accelerations.
+
+        Returns matplotlib Figure.
+        """
+        from agingclockbench.benchmarks.plots import plot_correlation_heatmap
+        return plot_correlation_heatmap(
+            results if results is not None else self._clock_results
+        )
+
+    def to_html(self, filename: str, df: pd.DataFrame | None = None,
+                results: dict | None = None) -> None:
+        """Export an interactive Plotly HTML benchmark report.
+
+        Parameters
+        ----------
+        filename : output path (e.g. 'report.html')
+        """
+        from agingclockbench.benchmarks.plots import to_html
+        to_html(
+            self,
+            df if df is not None else self._df,
+            results if results is not None else self._clock_results,
+            filename,
+            mortality_col=self._mortality_col,
+            followup_col=self._followup_col,
+        )

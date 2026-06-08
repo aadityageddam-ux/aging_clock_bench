@@ -1,3 +1,3 @@
-from agingclockbench.benchmarks.suite import BenchmarkSuite, BenchmarkResult
+from agingclockbench.benchmarks.suite import BenchmarkSuite, BenchmarkResult, BenchmarkReport
 
-__all__ = ["BenchmarkSuite", "BenchmarkResult"]
+__all__ = ["BenchmarkSuite", "BenchmarkResult", "BenchmarkReport"]

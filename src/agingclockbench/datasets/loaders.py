@@ -8,30 +8,47 @@ _DATA_DIR = Path(__file__).parent
 
 
 def load_nhanes_sample() -> pd.DataFrame:
-    """Load the bundled NHANES 2015-2018 sample (preprocessed, ~5000 rows).
+    """Load the bundled NHANES 1999-2000 sample (N=4,086 complete cases).
 
-    Returns a DataFrame with all columns required by PhenoAge, KDM, and
-    DunedinPACEProxy, plus mortality linkage columns from NCHS.
+    Source: CDC National Health and Nutrition Examination Survey 1999-2000,
+    with mortality linkage from NCHS Public-Use Linked Mortality Files.
+    All biomarkers are complete (no missing values). Participants are 20-85 years
+    old.
 
     Columns
     -------
-    age, albumin_g_dl, creatinine_mg_dl, glucose_mg_dl, crp_mg_l,
-    lymphocyte_pct, mcv_fl, rdw_pct, alp_u_l, wbc_k_ul,
-    hemoglobin_g_dl, sex, mortstat, permth_exm
+    seqn             : int   — NHANES participant sequence number
+    age              : float — chronological age in years
+    sex              : str   — 'male' or 'female'
+    albumin_g_dl     : float — albumin (g/dL)
+    creatinine_mg_dl : float — creatinine (mg/dL)
+    glucose_mg_dl    : float — glucose (mg/dL)
+    crp_mg_l         : float — C-reactive protein (mg/L)
+    lymphocyte_pct   : float — lymphocyte percentage (%)
+    mcv_fl           : float — mean corpuscular volume (fL)
+    rdw_pct          : float — red cell distribution width (%)
+    alp_u_l          : float — alkaline phosphatase (U/L)
+    wbc_k_ul         : float — white blood cell count (10³/μL)
+    mortstat         : int   — vital status at follow-up (1=deceased, 0=alive/censored)
+    permth_exm       : float — months from examination to death or censoring
 
     Returns
     -------
-    pd.DataFrame
+    pd.DataFrame with 4,086 rows and 14 columns.
 
-    Raises
-    ------
-    FileNotFoundError : if the bundled parquet file is not present.
-        Run ``agingclockbench datasets download`` to fetch it.
+    Examples
+    --------
+    >>> df = load_nhanes_sample()
+    >>> len(df)
+    4086
+    >>> list(df.columns[:4])
+    ['seqn', 'age', 'sex', 'albumin_g_dl']
     """
     parquet_path = _DATA_DIR / "nhanes_sample.parquet"
     if not parquet_path.exists():
         raise FileNotFoundError(
             f"Bundled NHANES sample not found at {parquet_path}.\n"
-            "Run: agingclockbench datasets download"
+            "This file should be included in the installed package. "
+            "If you installed from source, run: python -m agingclockbench.datasets.build"
         )
     return pd.read_parquet(parquet_path)
