@@ -36,8 +36,8 @@ jobs:
 
       - name: Publish to PyPI
         run: |
-          if [ -z "${{ secrets.PYPI_TOKEN }}" ]; then
-            echo "PYPI_TOKEN not set. Skipping publish. Set it in repo settings."
+          if [ -z "${{ secrets.AGING_CLOCK_BENCH }}" ]; then
+            echo "AGING_CLOCK_BENCH token not set. Skipping publish. Set it in repo settings."
             exit 0
           fi
-          poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+          poetry publish -u __token__ -p ${{ secrets.AGING_CLOCK_BENCH }}
