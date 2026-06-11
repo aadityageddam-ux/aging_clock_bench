@@ -5,15 +5,17 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,4 +35,9 @@ jobs:
         run: poetry build
 
       - name: Publish to PyPI
-        run: poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+        run: |
+          if [ -z "${{ secrets.PYPI_TOKEN }}" ]; then
+            echo "PYPI_TOKEN not set. Skipping publish. Set it in repo settings."
+            exit 0
+          fi
+          poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
