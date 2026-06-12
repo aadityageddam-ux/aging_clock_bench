@@ -205,50 +205,7 @@ def to_html(
     from plotly.subplots import make_subplots
     import plotly.express as px
 
-    n = len(results)
-    # --- Scatter subplots ---
-    fig_scatter = make_subplots(
-        rows=1, cols=n,
-        subplot_titles=[f"{name}" for name in results],
-        shared_yaxes=False,
-    )
-    colors = px.colors.qualitative.Plotly
-
-    for col, (name, result) in enumerate(results.items(), start=1):
-        if result.original_index is not None:
-            age = df.loc[result.original_index, "age"].values
-        else:
-            age = df["age"].iloc[: result.output_rows].values
-        bio_age = result.biological_ages.values
-
-        br = next((r for r in report.results if r.clock_name == name), None)
-        r_val = br.pearson_r if br else float("nan")
-
-        fig_scatter.add_trace(
-            go.Scatter(
-                x=age, y=bio_age,
-                mode="markers",
-                marker=dict(size=6, color=colors[col - 1], opacity=0.65),
-                name=f"{name} (r={r_val:.3f})",
-            ),
-            row=1, col=col,
-        )
-        lo = min(float(age.min()), float(bio_age.min()))
-        hi = max(float(age.max()), float(bio_age.max()))
-        fig_scatter.add_trace(
-            go.Scatter(x=[lo, hi], y=[lo, hi], mode="lines",
-                       line=dict(color="black", dash="dash", width=1),
-                       showlegend=False),
-            row=1, col=col,
-        )
-
-    fig_scatter.update_layout(
-        title="Biological Age vs Chronological Age",
-        height=520,
-        template="plotly_white",
-    )
-
-    # --- Benchmark table ---
+    # --- Benchmark table (built first; needed by Altair scatter) ---
     summary_df = report.to_dataframe()
     def _fmt(col):
         s = summary_df[col]
@@ -275,9 +232,69 @@ def to_html(
     _table_height = max(300, 100 + 40 * (len(summary_df) + 1))
     fig_table.update_layout(title="Benchmark Summary", height=_table_height)
 
+    # --- Scatter: Altair (preferred) with Plotly fallback ---
+    altair_html_section: str | None = None
+    try:
+        from .altair_plots import generate_scatter_heatmap
+        altair_html_section = generate_scatter_heatmap(
+            df=df,
+            summary_df=summary_df,
+            results=results,
+            top_n_clocks=2,
+        )
+    except Exception as _altair_err:
+        import warnings
+        warnings.warn(
+            f"Altair scatter failed ({_altair_err}); falling back to Plotly.",
+            stacklevel=2,
+        )
+
+    # Plotly fallback scatter (used if Altair is unavailable or errors)
+    n = len(results)
+    colors = px.colors.qualitative.Plotly
+    fig_scatter = make_subplots(
+        rows=1, cols=n,
+        subplot_titles=list(results.keys()),
+        shared_yaxes=False,
+    )
+    for col, (name, result) in enumerate(results.items(), start=1):
+        if result.original_index is not None:
+            age = df.loc[result.original_index, "age"].values
+        else:
+            age = df["age"].iloc[: result.output_rows].values
+        bio_age = result.biological_ages.values
+        br = next((r for r in report.results if r.clock_name == name), None)
+        r_val = br.pearson_r if br else float("nan")
+        fig_scatter.add_trace(
+            go.Scatter(
+                x=age, y=bio_age, mode="markers",
+                marker=dict(size=6, color=colors[col - 1], opacity=0.65),
+                name=f"{name} (r={r_val:.3f})",
+            ),
+            row=1, col=col,
+        )
+        lo = min(float(age.min()), float(bio_age.min()))
+        hi = max(float(age.max()), float(bio_age.max()))
+        fig_scatter.add_trace(
+            go.Scatter(x=[lo, hi], y=[lo, hi], mode="lines",
+                       line=dict(color="black", dash="dash", width=1),
+                       showlegend=False),
+            row=1, col=col,
+        )
+    fig_scatter.update_layout(
+        title="Biological Age vs Chronological Age",
+        height=520, template="plotly_white",
+    )
+
     # Combine into single HTML
-    html_scatter = fig_scatter.to_html(full_html=False, include_plotlyjs=False)
     html_table = fig_table.to_html(full_html=False, include_plotlyjs=False)
+    html_scatter_fallback = fig_scatter.to_html(full_html=False, include_plotlyjs=False)
+
+    scatter_section = (
+        f'<h2>Biological Age vs Chronological Age</h2>{altair_html_section}'
+        if altair_html_section is not None
+        else f'<h2>Biological Age vs Chronological Age</h2>{html_scatter_fallback}'
+    )
 
     html = f"""<!DOCTYPE html>
 <html>
@@ -294,8 +311,7 @@ def to_html(
   <h1>AgingClockBench Report</h1>
   <h2>Benchmark Summary</h2>
   {html_table}
-  <h2>Biological Age vs Chronological Age</h2>
-  {html_scatter}
+  {scatter_section}
 </body>
 </html>"""
 
