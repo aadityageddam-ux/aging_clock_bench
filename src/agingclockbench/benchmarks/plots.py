@@ -228,7 +228,7 @@ def to_html(
             go.Scatter(
                 x=age, y=bio_age,
                 mode="markers",
-                marker=dict(size=4, color=colors[col - 1], opacity=0.4),
+                marker=dict(size=6, color=colors[col - 1], opacity=0.65),
                 name=f"{name} (r={r_val:.3f})",
             ),
             row=1, col=col,
@@ -244,7 +244,7 @@ def to_html(
 
     fig_scatter.update_layout(
         title="Biological Age vs Chronological Age",
-        height=450,
+        height=520,
         template="plotly_white",
     )
 
@@ -271,7 +271,9 @@ def to_html(
             ),
         )]
     )
-    fig_table.update_layout(title="Benchmark Summary", height=200)
+    # Calculate table height dynamically: ~40px per row + header + margin
+    _table_height = max(300, 100 + 40 * (len(summary_df) + 1))
+    fig_table.update_layout(title="Benchmark Summary", height=_table_height)
 
     # Combine into single HTML
     html_scatter = fig_scatter.to_html(full_html=False, include_plotlyjs=False)
