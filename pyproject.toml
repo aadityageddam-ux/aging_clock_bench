@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "agingclockbench"
-version = "0.2.0"
+version = "0.2.1"
 description = "Benchmark biological aging clocks on your data — PhenoAge, KDM, DunedinPACE proxy"
 authors = ["Aaditya Geddam <aaditya.geddam@gmail.com>"]
 license = "MIT"
