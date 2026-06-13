@@ -23,13 +23,15 @@ jobs:
           python-version: "3.11"
 
       - name: Install Poetry
-        run: pip install poetry
+        run: pip install "poetry==2.4.1"
 
-      - name: Install dependencies
-        run: poetry install
+      - name: Install dependencies (no dev/docs)
+        run: poetry install --without dev,docs
 
       - name: Run tests
-        run: poetry run pytest tests/ -v
+        run: |
+          pip install pytest pytest-cov
+          poetry run pytest tests/ -v
 
       - name: Build package
         run: poetry build
@@ -37,7 +39,8 @@ jobs:
       - name: Publish to PyPI
         run: |
           if [ -z "${{ secrets.AGING_CLOCK_BENCH }}" ]; then
-            echo "AGING_CLOCK_BENCH token not set. Skipping publish. Set it in repo settings."
-            exit 0
+            echo "AGING_CLOCK_BENCH token not set. Skipping publish."
+            exit 1
           fi
-          poetry publish -u __token__ -p ${{ secrets.AGING_CLOCK_BENCH }}
+          poetry config pypi-token.pypi ${{ secrets.AGING_CLOCK_BENCH }}
+          poetry publish
