@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/agingclockbench.svg)](https://badge.fury.io/py/agingclockbench)
 [![Tests](https://github.com/aadityageddam-ux/aging_clock_bench/actions/workflows/test.yml/badge.svg)](https://github.com/aadityageddam-ux/aging_clock_bench/actions/workflows/test.yml)
 [![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen)](https://github.com/aadityageddam-ux/aging_clock_bench)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://aadityageddam-ux.github.io/aging_clock_bench/)
+[![Docs](https://img.shields.io/badge/docs-README-blue)](https://github.com/aadityageddam-ux/aging_clock_bench#quick-start)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 
@@ -11,7 +11,7 @@
 
 Multiple biological aging clocks exist — PhenoAge, KDM, DunedinPACE — but no standard tool lets researchers compare them side-by-side. AgingClockBench is the **first open-source Python package** implementing multiple clocks with a unified interface and reproducible mortality-validated benchmarking.
 
-📖 **[Full Documentation](https://aadityageddam-ux.github.io/aging_clock_bench/)**
+📖 **[Documentation & Examples](#quick-start)**
 
 ---
 
