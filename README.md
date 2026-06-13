@@ -106,7 +106,7 @@ agingclockbench benchmark \
 
 **How do I add a new clock?**
 
-Implement the `BaseClock` interface in a new file under `src/agingclockbench/clocks/`. See [CONTRIBUTING.md](CONTRIBUTING.md) for step-by-step instructions and [BaseClock source](src/agingclockbench/clocks/base.py).
+Implement the `BaseClock` interface in a new file under `src/agingclockbench/clocks/`. See [CONTRIBUTING.md](https://github.com/aadityageddam-ux/aging_clock_bench/blob/main/CONTRIBUTING.md) for step-by-step instructions and [BaseClock source](https://github.com/aadityageddam-ux/aging_clock_bench/blob/main/src/agingclockbench/clocks/base.py).
 
 **What's the difference between PhenoAge, KDM, and DunedinPACEProxy?**
 
@@ -158,9 +158,9 @@ help(PhenoAge)        # View docstring and parameters
 help(BenchmarkSuite)  # View benchmarking options
 ```
 
-**Adding a new clock:** See [CONTRIBUTING.md](CONTRIBUTING.md) for step-by-step instructions.
+**Adding a new clock:** See [CONTRIBUTING.md](https://github.com/aadityageddam-ux/aging_clock_bench/blob/main/CONTRIBUTING.md) for step-by-step instructions.
 
-**Example notebooks:** See [examples/](examples/) for Jupyter notebooks.
+**Example notebooks:** See [examples/](https://github.com/aadityageddam-ux/aging_clock_bench/tree/main/examples) for Jupyter notebooks.
 
 ---
 
@@ -186,9 +186,9 @@ If you use AgingClockBench in your research, please cite:
 
 ## Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions welcome! See [CONTRIBUTING.md](https://github.com/aadityageddam-ux/aging_clock_bench/blob/main/CONTRIBUTING.md).
 
-To add a new clock, implement the `BaseClock` interface — see the [FAQ](https://aadityageddam-ux.github.io/aging_clock_bench/faq/#how-do-i-add-a-new-clock).
+To add a new clock, implement the `BaseClock` interface — see the [FAQ](#faq) section above.
 
 ---
 
