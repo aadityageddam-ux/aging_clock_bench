@@ -9,7 +9,7 @@
 
 **Benchmark biological aging clocks on your data in minutes.**
 
-Multiple biological aging clocks exist — PhenoAge, KDM, DunedinPACE — but no standard tool lets researchers compare them side-by-side. AgingClockBench is the **first open-source Python package** implementing multiple clocks with a unified interface and reproducible mortality-validated benchmarking.
+Multiple biological aging clocks exist — PhenoAge, KDM, DunedinPACE — but no standard tool lets researchers compare them side-by-side. AgingClockBench is the **first open-source Python package[...]
 
 📖 **[Documentation & Examples](#quick-start)**
 
@@ -106,7 +106,7 @@ agingclockbench benchmark \
 
 **How do I add a new clock?**
 
-Implement the `BaseClock` interface in a new file under `src/agingclockbench/clocks/`. See [CONTRIBUTING.md](https://github.com/aadityageddam-ux/aging_clock_bench/blob/main/CONTRIBUTING.md) for step-by-step instructions and [BaseClock source](https://github.com/aadityageddam-ux/aging_clock_bench/blob/main/src/agingclockbench/clocks/base.py).
+Implement the `BaseClock` interface in a new file under `src/agingclockbench/clocks/`. See [CONTRIBUTING.md](https://github.com/aadityageddam-ux/aging_clock_bench/blob/main/CONTRIBUTING.md) for s[...]
 
 **What's the difference between PhenoAge, KDM, and DunedinPACEProxy?**
 
@@ -170,7 +170,7 @@ If you use AgingClockBench in your research, please cite:
 
 ```bibtex
 @software{geddam2026agingclockbench,
-  author = {Geddam, Aaditya},
+  author = {Geddam, Aaditya and Geddam, Aashvi},
   title  = {AgingClockBench: Benchmarking biological aging clocks},
   url    = {https://github.com/aadityageddam-ux/aging_clock_bench},
   year   = {2026}
@@ -181,6 +181,13 @@ If you use AgingClockBench in your research, please cite:
 
 - Levine ME, et al. *Aging Cell.* 2018. (PhenoAge)
 - Klemera P, Doubal S. *Mech Ageing Dev.* 2006. (KDM)
+
+---
+
+## Contributors
+
+- **Aaditya Geddam** — Project creator and maintainer
+- **Aashvi Geddam** — Contributor
 
 ---
 
