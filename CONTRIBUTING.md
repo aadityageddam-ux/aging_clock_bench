@@ -14,10 +14,10 @@ poetry run pytest tests/ -v
 ## Adding a new clock
 
 1. Create `src/agingclockbench/clocks/myclock.py`
-2. Implement `BaseClock` — see [FAQ](https://aadityageddam-ux.github.io/aging_clock_bench/faq/)
+2. Implement `BaseClock` — see [BaseClock source](src/agingclockbench/clocks/base.py) and existing clocks like [PhenoAge](src/agingclockbench/clocks/phenoage.py)
 3. Add to `src/agingclockbench/clocks/__init__.py` and `src/agingclockbench/__init__.py`
 4. Write tests in `tests/test_myclock.py` (validate against published examples)
-5. Add algorithm explainer to `docs/docs/algorithms/myclock.md`
+5. (Optional) Add algorithm explainer comments to your implementation
 
 ## Running checks
 
