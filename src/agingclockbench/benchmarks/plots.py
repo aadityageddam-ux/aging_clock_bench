@@ -204,39 +204,16 @@ def to_html(
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
     import plotly.express as px
+    from .altair_plots import generate_bland_altman_plots, _stats_table
 
-    # --- Benchmark table (built first; needed by Altair scatter) ---
+    # --- Benchmark table: clean HTML (no Plotly widget, no duplicate title) ---
     summary_df = report.to_dataframe()
-    def _fmt(col):
-        s = summary_df[col]
-        if pd.api.types.is_numeric_dtype(s):
-            return s.round(4).astype(str).tolist()
-        return s.astype(str).tolist()
-
-    fig_table = go.Figure(
-        data=[go.Table(
-            header=dict(
-                values=list(summary_df.columns),
-                fill_color="#2c3e50",
-                font=dict(color="white", size=12),
-                align="left",
-            ),
-            cells=dict(
-                values=[_fmt(c) for c in summary_df.columns],
-                fill_color="lavender",
-                align="left",
-            ),
-        )]
-    )
-    # Calculate table height dynamically: ~40px per row + header + margin
-    _table_height = max(300, 100 + 40 * (len(summary_df) + 1))
-    fig_table.update_layout(title="Benchmark Summary", height=_table_height)
+    html_table = _stats_table(summary_df, list(summary_df["Clock"]))
 
     # --- Scatter: Altair (preferred) with Plotly fallback ---
     altair_html_section: str | None = None
     try:
-        from .altair_plots import generate_scatter_heatmap
-        altair_html_section = generate_scatter_heatmap(
+        altair_html_section = generate_bland_altman_plots(
             df=df,
             summary_df=summary_df,
             results=results,
@@ -287,8 +264,13 @@ def to_html(
     )
 
     # Combine into single HTML
-    html_table = fig_table.to_html(full_html=False, include_plotlyjs=False)
     html_scatter_fallback = fig_scatter.to_html(full_html=False, include_plotlyjs=False)
+
+    # Only include Plotly CDN if Altair failed and we fell back to Plotly scatter
+    plotly_cdn = (
+        '<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>'
+        if altair_html_section is None else ""
+    )
 
     scatter_section = (
         f'<h2>Biological Age vs Chronological Age</h2>{altair_html_section}'
@@ -300,7 +282,7 @@ def to_html(
 <html>
 <head>
   <title>AgingClockBench Report</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  {plotly_cdn}
   <style>
     body {{ font-family: Arial, sans-serif; max-width: 1200px; margin: auto; padding: 20px; }}
     h1 {{ color: #2c3e50; }}

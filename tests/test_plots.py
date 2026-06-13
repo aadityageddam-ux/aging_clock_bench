@@ -57,7 +57,8 @@ def test_to_html_creates_file(nhanes_with_results, tmp_path):
     with open(html_path) as f:
         content = f.read()
     assert "AgingClockBench" in content
-    assert "plotly" in content.lower()
+    # Altair (vega-embed) is the primary renderer; Plotly CDN only loads on fallback
+    assert "vega" in content.lower()
 
 
 def test_to_html_contains_table(nhanes_with_results, tmp_path):
